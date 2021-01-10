@@ -6,5 +6,5 @@
 本サイトは[Franklin.jl](https://github.com/tlienart/Franklin.jl)にて作成され、Github Pages上で公開されています。ソースは[ここ](https://github.com/okshouiti/memo)。
 
 - windows
-  - [bug.n](/windows/bug.n/)
+  - [bug.n](/windows/bug.n/) - windows用タイリングウィンドウマネージャ
 
