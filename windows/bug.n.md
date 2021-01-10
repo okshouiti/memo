@@ -21,7 +21,7 @@
 
 ## 既定のキーバインド
 
-[Default_hotkeys.md](https://github.com/fuhsjr00/bug.n/blob/master/doc/Default_hotkeys.md) より
+[Default_hotkeys.md](https://github.com/fuhsjr00/bug.n/blob/master/doc/Default_hotkeys.md) より、
 
 「ビュー→仮想デスク」、「マスターエリア→メインエリア」など一部を言い換えた。また、挙動がよくわからないものなどは空欄のまま（分かり次第追記）。
 
