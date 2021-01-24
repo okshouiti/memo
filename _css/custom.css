@@ -1,3 +1,65 @@
+:root {
+    --ok-root-font-size: 18px;
+    --ok-global-bg: #222;
+    --ok-global-color: #888;
+    --ok-hr-lines-color: #555;
+    --ok-inline-code-bg: #181818;
+    --ok-inline-code-color: #ccc;
+    --ok-code-block-bg: #0a0a0a;
+    --ok-code-block-color: #aaa
+}
+
+
+
+html {
+    font-size: var(--ok-root-font-size)
+}
+
+body {
+    color: var(--ok-global-color)
+}
+
+html,
+.slideout-panel {
+    background: var(--ok-global-bg)
+}
+
+/* menu toggle button */
+.hamburger-inner,
+.hamburger-inner::after,
+.hamburger-inner::before {
+    background: var(--ok-global-color)
+}
+
+@media (min-width: 940px) {
+.franklin-content {
+    width: auto;
+    max-width: 45rem
+}
+}
+
+
+
+
+/* --------------- Content --------------- */
+/* links */
+.franklin-content a {
+    color: #659ed2
+}
+
+/* headlines */
+.franklin-content h2,
+.franklin-content h3 {
+    font-weight: bold
+}
+.franklin-content h2 {
+    margin-top: 6rem
+}
+
+/* tables */
+.franklin-content table {
+    margin: unset
+}
 .franklin-content th,
 .franklin-content td {
     border: 1px solid #888;
@@ -5,9 +67,74 @@
     text-align: left
 }
 
+/* keyboards */
 .franklin-content kbd {
-    background: #ddd;
+    background: #181818;
     border-radius: .3rem;
-    border: 1px solid #666;
-    padding: .1rem .2rem
+    border: 1px solid #111;
+    padding: .1rem .3rem
+}
+
+/* horizontal lines */
+hr {
+    height: 2px;
+    background: var(--ok-hr-lines-color);
+    box-shadow: none
+}
+.franklin-content h2 {
+    border-bottom: 2px solid var(--ok-hr-lines-color)
+}
+.page-foot {
+    border-top: 2px solid var(--ok-hr-lines-color)
+}
+
+
+
+
+
+/* --------------- Code --------------- */
+/* inline code */
+code {
+    background: var(--ok-inline-code-bg);
+    color: var(--ok-inline-code-color);
+    padding: .1rem .3rem
+}
+
+/* code block */
+pre > code,
+pre > .hljs {
+    display: block;
+    background: var(--ok-code-block-bg);
+    color: var(--ok-code-block-color);
+    padding: .5rem 1rem;
+    font-size: .9rem;
+    border-radius: .4rem
+}
+
+/* Highlight.js */
+.hljs-comment {
+    color: #86803a;
+    font-size: .8rem
+}
+
+
+
+
+
+/* --------------- Miscellaneous --------------- */
+/* scroll bar */
+::-webkit-scrollbar {
+    width: 14px;
+    height: 10px
+}
+::-webkit-scrollbar,
+::-webkit-scrollbar-track {
+    background: #0001
+}
+::-webkit-scrollbar-thumb {
+    background: #467;
+    border-radius: 6px
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #79a
 }
