@@ -1,15 +1,14 @@
-+++
-website_title = "memo"
-website_descr = "My personal memo."
-website_url   = "https://memo.okshouiti.com/"
-author = "okshouiti"
-date_format = "yyyy-mm-dd"
-autocode = true
-automath = true
-mintoclevel = 2
-maxtoclevel = 4
-ignore = ["node_modules/", "franklin", "franklin.pub"]
-+++
+@def author = "okshouiti"
+@def website_title = "memo"
+@def website_descr = "My personal memo."
+@def website_url   = "https://memo.okshouiti.com/"
+@def date_format = "yyyy-mm-dd"
+@def autocode = true
+@def automath = true
+@def mintoclevel = 2
+@def maxtoclevel = 4
+@def ignore = ["node_modules/", "franklin", "franklin.pub"]
+
 
 
 <!-- 改行コマンド -->
