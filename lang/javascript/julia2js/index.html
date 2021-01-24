@@ -1,0 +1,491 @@
+<!doctype html> <html lang=ja > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="https://cdn.jsdelivr.net/npm/highlight.js@10.5.0/styles/color-brewer.css"> <link href="/css/franklin.css" rel=stylesheet > <link href="/css/vela.css" rel=stylesheet > <link href="/css/custom.css" rel=stylesheet > <script src="/libs/vela/jquery.min.js"></script> <link rel=icon  href="/assets/favicon.png"> <title>JuliaからJavaScriptへ入門</title> <div class=main-nav  id=menu > <div class=flex-container > <span class=sidebar-brand > <h3 style='font-size: 25px'>memo</h3> </span> </div> <nav class=sidebar-nav > <ul class=metismenu  id=metismenu  > <li><a href="/index.html">Home</a> <li><a href="" class=has-arrow >windows</a> <ul> <li><a href="/windows/bug.n/">bug.n</a> </ul> <li><a href="" class=has-arrow >languages</a> <ul> <li><a href="" class=has-arrow >JavaScript</a> <ul class=children > <li><a href="/lang/javascript/julia2js/">JuliaからJavaへ入門</a> </ul> </ul> </ul> </nav> </div> <main id=panel > <div class="toggle-button hamburger hamburger--spin"> <div class=hamburger-box > <div class=hamburger-inner ></div> </div> </div> <h1 class="page title">JuliaからJavaScriptへ入門</h1> <hr> <div class=franklin-content ><p>JuliaをベースにしてJavaScriptに入門する。主にJuliaと異なる部分に言及する。</p> <div class=franklin-toc ><ol><li><a href="#概要">概要</a><li><a href="#変数">変数</a><li><a href="#型">型</a><ol><li><a href="#プリミティブ型">プリミティブ型</a><li><a href="#ラッパーオブジェクト">ラッパーオブジェクト</a><li><a href="#オブジェクト">オブジェクト</a><li><a href="#明示的型変換">明示的型変換</a></ol><li><a href="#演算子">演算子</a><li><a href="#関数">関数</a><ol><li><a href="#定義">定義</a><li><a href="#可変長引数関数">可変長引数関数</a><li><a href="#分割代入">分割代入</a><li><a href="#メソッド">メソッド</a></ol><li><a href="#条件分岐">条件分岐</a><ol><li><a href="#if文">if文</a><li><a href="#switch文">switch文</a></ol><li><a href="#ループ">ループ</a><ol><li><a href="#while文">while文</a><li><a href="#for文">for文</a></ol><li><a href="#object">object</a><ol><li><a href="#json">JSON</a></ol><li><a href="#様々なオブジェクト">様々なオブジェクト</a><ol><li><a href="#文字列">文字列</a><li><a href="#配列">配列</a><ol><li><a href="#基本">基本</a><li><a href="#追加削除破壊的">追加、削除（破壊的）</a><li><a href="#検索">検索</a><li><a href="#反復処理">反復処理</a></ol><li><a href="#マップ_es2015">マップ &#40;ES2015&#41;</a><li><a href="#set">Set</a><li><a href="#ほか">ほか</a></ol><li><a href="#スコープ">スコープ</a><ol><li><a href="#クロージャ">クロージャ</a><li><a href="#thisキーワード"><code>this</code>キーワード</a><li><a href="#モダンコードでは気にしなくてよい事">モダンコードでは気にしなくてよい事</a><ol><li><a href="#即時関数">即時関数</a><li><a href="#巻き上げ">巻き上げ</a></ol></ol><li><a href="#クラス">クラス</a><ol><li><a href="#プロトタイプオブジェクト">プロトタイプオブジェクト</a><li><a href="#クラスの定義">クラスの定義</a><li><a href="#インスタンスメソッドとプロトタイプチェーン">インスタンスメソッドとプロトタイプチェーン</a><li><a href="#アクセッサープロパティ">アクセッサープロパティ</a><li><a href="#静的メソッド">静的メソッド</a><li><a href="#継承">継承</a></ol><li><a href="#例外処理">例外処理</a><li><a href="#非同期処理ecmascriptモジュール">非同期処理&amp;ECMAScriptモジュール</a><li><a href="#出典">出典</a></ol></div> <h2 id="概要"><a href="#概要">概要</a></h2> <ul> <li><p>ECMAScriptという標準規格があり、ブラウザやNode.jsなどで独自に実装されている</p> <li><p>安全でないレガシー機能を制限するstrict mode</p> <ul> <li><p>ファイルか関数の先頭に<code>&quot;use strict&quot;;</code>という文字列を置くと有効</p> </ul> <li><p>実行コンテキスト</p> <ul> <li><p>Script - 基本の実行コンテキスト、デフォルトで非strict mode</p> <li><p>Module - モジュールとして実行する、独自の機能を持つ。デフォルトでstrict mode</p> </ul> <li><p>セミコロン<code>;</code>で文を区切る</p> <li><p>コメント</p> <ul> <li><p>単行 - <code>// コメント</code></p> <li><p>複数行 - <code>/* コメント */</code></p> </ul> </ul> <p>以下、コードの検証は<code>Node.js v15.6.0</code>にて行う。</p> <h2 id="変数"><a href="#変数">変数</a></h2> <ul> <li><p>変数名はcase-sensitiveで使えるのは</p> <ul> <li><p><code>a~Z</code></p> <li><p><code>0~9</code></p> <li><p><code>_</code></p> <li><p><code>&#36;</code></p> <li><p>一応、一部の日本語（漢字含む）が使えないこともない</p> </ul> </ul> <pre><code class="javascript hljs"><span class=hljs-comment >// const (ES2015)</span>
+<span class=hljs-comment >// 宣言のみは不可、要初期化</span>
+<span class=hljs-comment >// プリミティブな値以外ではミュータブル</span>
+<span class=hljs-keyword >const</span> 変数名<span class=hljs-number >1</span> = 値<span class=hljs-number >1</span>,
+      変数名<span class=hljs-number >2</span> = 値<span class=hljs-number >2</span>;
+
+<span class=hljs-comment >// let (ES2015) varは基本的に使わない</span>
+<span class=hljs-keyword >let</span> 変数名;       <span class=hljs-comment >// 宣言</span>
+<span class=hljs-keyword >let</span> 変数名 = 値;  <span class=hljs-comment >// 初期化</span>
+変数名 = 値;      <span class=hljs-comment >// 再代入</span>
+
+<span class=hljs-comment >// var  事実上deprecated？</span>
+<span class=hljs-keyword >var</span> 変数名;
+<span class=hljs-keyword >var</span> 変数名<span class=hljs-number >1</span> = 値<span class=hljs-number >1</span>;
+<span class=hljs-keyword >var</span> 変数名<span class=hljs-number >1</span> = 値<span class=hljs-number >2</span>;   <span class=hljs-comment >// 再代入だけでなく再定義が可能、ほかにも巻き上げ問題がある</span></code></pre> <h2 id="型"><a href="#型">型</a></h2> <h3 id="プリミティブ型"><a href="#プリミティブ型">プリミティブ型</a></h3> <table><tr><th align=right >型<th align=right >ラッパーオブジェクト<th align=right >Juliaの何に相当？<th align=right >説明<tr><td align=right ><code>boolean</code><td align=right ><code>Boolean</code><td align=right ><code>Bool</code><td align=right >真偽値<tr><td align=right ><code>number</code><td align=right ><code>Number</code><td align=right ><code>Number</code><td align=right >数値、Juliaでは抽象型だが<tr><td align=right ><code>bigint</code><td align=right ><td align=right ><code>BigInt</code><td align=right >ES2020より<tr><td align=right ><code>string</code><td align=right ><code>String</code><td align=right ><code>String</code><td align=right >文字列<tr><td align=right ><code>undefined</code><td align=right ><td align=right ><td align=right >未定義の値。返値のない式の結果など。<tr><td align=right ><code>null</code><td align=right ><td align=right ><td align=right ><tr><td align=right ><code>Symbol</code><td align=right ><code>Symbol</code><td align=right ><td align=right ></table> <h3 id="ラッパーオブジェクト"><a href="#ラッパーオブジェクト">ラッパーオブジェクト</a></h3> <p>プリミティブ型の値をラップしたオブジェクト。この仕組みにより、プリミティブ型の値に対してインスタンスメソッドを呼び出せる。プリミティブ型の値に対してメソッド呼び出しなどを行うと自動的にラッパーオブジェクトへの変換が行われる。</p> <pre><code class="javascript hljs"><span class=hljs-keyword >const</span> str = <span class=hljs-string >&quot;string&quot;</span>;
+<span class=hljs-keyword >const</span> wrapObj = <span class=hljs-keyword >new</span> <span class=hljs-built_in >String</span>(<span class=hljs-string >&quot;string&quot;</span>);
+<span class=hljs-keyword >typeof</span>(str) === <span class=hljs-keyword >typeof</span>(wrapObj);   <span class=hljs-comment >// -&gt; false</span>
+
+<span class=hljs-comment >// プリミティブ値の取り出し</span>
+<span class=hljs-keyword >const</span> wrap = <span class=hljs-keyword >new</span> <span class=hljs-built_in >String</span>(<span class=hljs-string >&quot;primitive&quot;</span>);
+<span class=hljs-keyword >typeof</span>(wrap.valueOf());   <span class=hljs-comment >// -&gt; &#x27;string&#x27;</span></code></pre> <h3 id="オブジェクト"><a href="#オブジェクト">オブジェクト</a></h3> <p>オブジェクト、配列、関数、正規表現、Dateなど</p> <h3 id="明示的型変換"><a href="#明示的型変換">明示的型変換</a></h3> <pre><code class="javascript hljs"><span class=hljs-comment >// 文字列→数値</span>
+<span class=hljs-built_in >Number</span>(<span class=hljs-string >&quot;123&quot;</span>);   <span class=hljs-comment >// -&gt; 123</span>
+<span class=hljs-built_in >Number</span>(<span class=hljs-string >&quot;not number&quot;</span>);   <span class=hljs-comment >// -&gt; NaN (数値以外が含まれる)</span>
+<span class=hljs-built_in >Number</span>.parseInt(<span class=hljs-string >&quot;32 years old&quot;</span>, <span class=hljs-number >10</span>);   <span class=hljs-comment >// -&gt; 32 10進数としてパース</span>
+<span class=hljs-built_in >Number</span>.parseFloat(<span class=hljs-string >&quot;19.5 points&quot;</span>);   <span class=hljs-comment >// -&gt; 19.5</span></code></pre> <h2 id="演算子"><a href="#演算子">演算子</a></h2> <pre><code class="javascript hljs"><span class=hljs-comment >// 比較</span>
+a == b;   <span class=hljs-comment >// 暗黙的な型変換を伴う</span>
+a === b;   <span class=hljs-comment >// 型変換なし、明示的な型変換が必要でないならこちらを使う</span>
+
+<span class=hljs-comment >// 文字列連結</span>
+<span class=hljs-string >&quot;str1&quot;</span> + <span class=hljs-string >&quot;str2&quot;</span>;
+
+<span class=hljs-comment >// べき乗 (ES2016)</span>
+<span class=hljs-number >2</span>**<span class=hljs-number >3</span>;   <span class=hljs-comment >// -&gt; 8</span>
+
+<span class=hljs-comment >// インクリ・デクリメント</span>
+++変数;   <span class=hljs-comment >// 前置、インクリメントしてから変数の値を返す</span>
+変数--;   <span class=hljs-comment >// 後置、変数の値を返してからデクリメント</span>
+
+<span class=hljs-comment >// 分割代入 (ES2015)</span>
+<span class=hljs-keyword >const</span> arr = [<span class=hljs-string >&quot;aaa&quot;</span>, <span class=hljs-string >&quot;bbb&quot;</span>];
+<span class=hljs-keyword >const</span> [str1, str2] = arr;   <span class=hljs-comment >// juliaとは違い角括弧を使う</span>
+
+<span class=hljs-comment >/*
+Nullish coalescing演算子 (ES2020)
+	Boolしか受け付けないjuliaの短絡評価と異なり、jsでは左辺の値を真偽値に型変換する。
+	これは値が未定義な場合に規定値を指定するためによく利用されるが、
+	0などの値が定義されていても未定義として規定値を返してしまう。
+	一方この演算子は、左辺がnullまたはundefinedなら右辺を評価する。
+*/</span>
+<span class=hljs-literal >null</span> ?? <span class=hljs-string >&quot;the result is null&quot;</span>;
+
+<span class=hljs-comment >// 複合式</span>
+式<span class=hljs-number >1</span>, 式<span class=hljs-number >2</span>, 式<span class=hljs-number >3</span>;   <span class=hljs-comment >// juliaでの(式;式)</span></code></pre> <h2 id="関数"><a href="#関数">関数</a></h2> <ul> <li><p><code>return;</code>で値を返さない。結果は<code>undefined</code></p> <li><p>関数呼出時に渡した値が定義されている引数の数より</p> <ul> <li><p>少ないと、それらは<code>undefined</code>として実行される</p> <li><p>多いと、余分な値は無視して実行される</p> </ul> <li><p>デフォルト値が定義できる（ES2015）</p> </ul> <h3 id="定義"><a href="#定義">定義</a></h3> <pre><code class="javascript hljs"><span class=hljs-function ><span class=hljs-keyword >function</span> 関数名(<span class=hljs-params >引数</span>) </span>{
+    コード...;
+    <span class=hljs-keyword >return</span> 返値;
+}
+
+
+<span class=hljs-comment >// 関数式による定義、無名関数オブジェクトを変数に代入</span>
+<span class=hljs-keyword >const</span> 変数名 = <span class=hljs-function ><span class=hljs-keyword >function</span>(<span class=hljs-params ></span>) </span>{
+    コード...;
+    <span class=hljs-keyword >return</span> 返値;
+};
+<span class=hljs-comment >// 関数式で関数名を使うとその関数の内側からのみ関数名を使えるので再帰などで便利</span>
+<span class=hljs-keyword >const</span> myRecursive = <span class=hljs-function ><span class=hljs-keyword >function</span> <span class=hljs-title >callMyself</span>(<span class=hljs-params >n</span>) </span>{
+    <span class=hljs-keyword >if</span> (n===<span class=hljs-number >0</span> || n&lt;<span class=hljs-number >0</span>) {
+        <span class=hljs-keyword >return</span> <span class=hljs-built_in >console</span>.log(<span class=hljs-string >&quot;finished&quot;</span>);
+    }
+    <span class=hljs-built_in >console</span>.log(n);
+    callMyself(n-<span class=hljs-number >1</span>);
+};
+myRecursive(<span class=hljs-number >5</span>);   <span class=hljs-comment >// -&gt; 5,4,3,2,1,finished</span>
+callMyself(<span class=hljs-number >5</span>);   <span class=hljs-comment >// -&gt; not defined</span>
+
+
+<span class=hljs-comment >/*
+アロー関数（ES2015）
+	常に無名関数
+	thisが静的に決まる（後述）
+	newが使えない。非コンストラクタ
+	argumentsで引数添字アクセス不可
+*/</span>
+<span class=hljs-keyword >const</span> 変数名 = <span class=hljs-function >(<span class=hljs-params >引数</span>) =&gt;</span> {
+    コード...;
+    <span class=hljs-keyword >return</span> 返値;
+};
+<span class=hljs-keyword >const</span> 変数名 = <span class=hljs-function >() =&gt;</span> {処理};   <span class=hljs-comment >// 無引数</span>
+<span class=hljs-keyword >const</span> 変数名 = <span class=hljs-function ><span class=hljs-params >x</span> =&gt;</span> {処理};   <span class=hljs-comment >// 1引数</span>
+<span class=hljs-keyword >const</span> 変数名 = <span class=hljs-function >(<span class=hljs-params >x, y</span>) =&gt;</span> {処理};   <span class=hljs-comment >// 2引数</span>
+<span class=hljs-keyword >const</span> 変数名 = <span class=hljs-function ><span class=hljs-params >x</span> =&gt;</span> x*x;   <span class=hljs-comment >// 単式、その結果が返値</span></code></pre> <h3 id="可変長引数関数"><a href="#可変長引数関数">可変長引数関数</a></h3> <pre><code class="javascript hljs"><span class=hljs-comment >// ...は前置</span>
+<span class=hljs-function ><span class=hljs-keyword >function</span> <span class=hljs-title >func</span>(<span class=hljs-params >x, ...args</span>)</span>{
+    <span class=hljs-built_in >console</span>.log(x);
+    <span class=hljs-built_in >console</span>.log(args);
+}
+
+<span class=hljs-comment >// Spread構文による引数展開時も前置</span>
+<span class=hljs-keyword >const</span> myints = [<span class=hljs-number >1</span>,<span class=hljs-number >2</span>,<span class=hljs-number >3</span>,<span class=hljs-number >4</span>,<span class=hljs-number >5</span>];
+func(<span class=hljs-number >1</span>, ...myints)
+
+<span class=hljs-comment >// arguments</span>
+<span class=hljs-comment >// 関数の中でのみ使えるArray-likeオブジェクトで引数に添字アクセスできる</span></code></pre> <h3 id="分割代入"><a href="#分割代入">分割代入</a></h3> <pre><code class="javascript hljs"><span class=hljs-keyword >const</span> person = {
+    <span class=hljs-attr >age</span>: <span class=hljs-number >24</span>
+};
+
+<span class=hljs-function ><span class=hljs-keyword >function</span> <span class=hljs-title >howOld</span>(<span class=hljs-params >{ age }</span>)</span>{
+    <span class=hljs-keyword >return</span> age;
+}
+
+howOld(person);</code></pre> <h3 id="メソッド"><a href="#メソッド">メソッド</a></h3> <pre><code class="javascript hljs"><span class=hljs-keyword >const</span> オブジェクト名 = {
+    メソッド名: <span class=hljs-function ><span class=hljs-keyword >function</span>(<span class=hljs-params ></span>) </span>{
+        コード...;
+    },
+    メソッド名: <span class=hljs-function >() =&gt;</span> {
+        コード...;
+    }
+}
+
+<span class=hljs-keyword >const</span> オブジェクト名 = {};
+オブジェクト名.メソッド名 = <span class=hljs-function ><span class=hljs-keyword >function</span>(<span class=hljs-params ></span>) </span>{
+    コード...;
+};
+
+<span class=hljs-keyword >const</span> オブジェクト名 = {
+    メソッド名() {
+        <span class=hljs-keyword >return</span> <span class=hljs-string >&quot;Hello, world!&quot;</span>;
+    }
+};</code></pre> <h2 id="条件分岐"><a href="#条件分岐">条件分岐</a></h2> <p>条件式の結果は<code>boolean</code>へ暗黙のうちに型変換される。</p> <h3 id="if文"><a href="#if文">if文</a></h3> <pre><code class="javascript hljs"><span class=hljs-keyword >if</span> (条件式) {
+    コード...;
+} <span class=hljs-keyword >else</span> <span class=hljs-keyword >if</span> (条件式) {
+    コード...;
+} <span class=hljs-keyword >else</span> {
+    コード...;
+}</code></pre> <h3 id="switch文"><a href="#switch文">switch文</a></h3> <p>式の結果と厳密に一致するラベル以降の<code>case</code>節を実行する。一致するラベルの<code>case</code>節のみ実行したい場合は節の最後で<code>break;</code>する</p> <pre><code class="javascript hljs"><span class=hljs-keyword >switch</span> (式) {
+    <span class=hljs-keyword >case</span> ラベル<span class=hljs-number >1</span>:
+        コード...;
+    <span class=hljs-keyword >case</span> ラベル<span class=hljs-number >2</span>:
+        コード...;
+    <span class=hljs-keyword >default</span>:
+        <span class=hljs-comment >// 一致するラベルがなければここが実行される</span>
+        コード...;
+}</code></pre> <h2 id="ループ"><a href="#ループ">ループ</a></h2> <h3 id="while文"><a href="#while文">while文</a></h3> <pre><code class="javascript hljs"><span class=hljs-keyword >let</span> 反復変数 = <span class=hljs-number >1</span>;
+
+<span class=hljs-comment >// 条件式を評価してから処理を実行</span>
+<span class=hljs-keyword >while</span> (条件式) {
+    コード...;
+    反復変数を操作;
+}
+
+<span class=hljs-comment >// 処理を実行してから条件式を評価</span>
+<span class=hljs-keyword >do</span> {
+    コード...;
+    反復変数を操作;
+} <span class=hljs-keyword >while</span> (条件式);</code></pre> <h3 id="for文"><a href="#for文">for文</a></h3> <p>イテラブルオブジェクトは配列や文字列など</p> <pre><code class="javascript hljs"><span class=hljs-comment >// 反復変数はconstで初期化</span>
+<span class=hljs-keyword >for</span> (反復変数初期化式; 条件式; 反復変数操作) {
+    コード...;
+}
+
+<span class=hljs-comment >// われらがfor文 (ES2015)</span>
+<span class=hljs-keyword >for</span> (反復変数 <span class=hljs-keyword >of</span> イテラブルオブジェクト) {
+    コード...;
+}</code></pre> <h2 id=object ><a href="#object">object</a></h2> <p>jsの基本オブジェクト、ミュータブル。<code>Symbol</code>以外オブジェクトはプロパティ名に設定する際に<code>toString</code>メソッドで文字列に暗黙的変換されるため要注意。</p> <pre><code class="javascript hljs"><span class=hljs-comment >// 空のobject</span>
+<span class=hljs-keyword >const</span> 変数名 = {};
+
+<span class=hljs-comment >// キーとして識別できる名前ならシングル・ダブルクオートを省略可</span>
+<span class=hljs-keyword >const</span> myName = <span class=hljs-string >&quot;my name&quot;</span>;
+<span class=hljs-keyword >const</span> yourName = <span class=hljs-string >&quot;your name&quot;</span>;
+<span class=hljs-keyword >const</span> obj = {
+    <span class=hljs-attr >key</span>: <span class=hljs-string >&quot;value&quot;</span>,
+    <span class=hljs-string >&quot;key-2&quot;</span>: myName,
+    [式]: <span class=hljs-string >&quot;式の結果をキーにする&quot;</span>,
+    yourName   <span class=hljs-comment >// 定義済み変数が単独である場合は&quot;yourName&quot;: yourNameと同義</span>
+};
+
+<span class=hljs-comment >// 読み出しはPropertyDicts.jlのようにドットも使える</span>
+<span class=hljs-built_in >console</span>.log(obj.yourName);
+<span class=hljs-built_in >console</span>.log(obj[<span class=hljs-string >&quot;key-2&quot;</span>]);
+
+<span class=hljs-comment >// 分割代入で各プロパティを同名の変数に代入する</span>
+<span class=hljs-keyword >const</span> score = {
+    <span class=hljs-attr >eng</span>: <span class=hljs-string >&quot;89&quot;</span>,
+    <span class=hljs-attr >math</span>: <span class=hljs-string >&quot;92&quot;</span>,
+    <span class=hljs-attr >lastYear</span>: {
+        <span class=hljs-attr >eng</span>: <span class=hljs-string >&quot;67&quot;</span>,
+        <span class=hljs-attr >math</span>: <span class=hljs-string >&quot;80&quot;</span>
+    }
+};
+<span class=hljs-keyword >const</span> { eng, math } = score;
+
+<span class=hljs-comment >// プロパティの参照・操作</span>
+score.bio = <span class=hljs-string >&quot;77&quot;</span>;
+score[<span class=hljs-string >&quot;poli-econ&quot;</span>] = <span class=hljs-string >&quot;82&quot;</span>;
+<span class=hljs-keyword >delete</span>(score.math);
+<span class=hljs-string >&quot;bio&quot;</span> <span class=hljs-keyword >in</span> score;   <span class=hljs-comment >// -&gt; true</span>
+score.hasOwnProperty(<span class=hljs-string >&quot;physics&quot;</span>);   <span class=hljs-comment >// -&gt; false</span>
+<span class=hljs-built_in >Object</span>.keys(score);   <span class=hljs-comment >// 静的メソッド（クラス項を参照）</span>
+<span class=hljs-built_in >Object</span>.values(score);
+<span class=hljs-built_in >Object</span>.entries(score);
+<span class=hljs-built_in >Object</span>.assign({}, score, {<span class=hljs-attr >history</span>:<span class=hljs-string >&quot;77&quot;</span>});   <span class=hljs-comment >// 第二引数以降を第一引数にマージ（破壊的）</span>
+<span class=hljs-keyword >const</span> score2 = {<span class=hljs-attr >history</span>:<span class=hljs-string >&quot;77&quot;</span>, <span class=hljs-attr >ethic</span>:<span class=hljs-string >&quot;92&quot;</span>};
+<span class=hljs-keyword >const</span> newScore = {...score, ...score2};   <span class=hljs-comment >// マージ法２、重複時後ろのオブジェクトが優先</span>
+
+<span class=hljs-comment >// コピー</span>
+<span class=hljs-keyword >const</span> person = {
+    <span class=hljs-attr >name</span>:<span class=hljs-string >&quot;taro&quot;</span>,
+    <span class=hljs-attr >age</span>:<span class=hljs-number >22</span>,
+    <span class=hljs-attr >score</span>: {
+        <span class=hljs-attr >eng</span>: <span class=hljs-number >70</span>,
+        <span class=hljs-attr >math</span>: <span class=hljs-number >80</span>
+    }
+};
+<span class=hljs-comment >// 通常の代入はコピーを作らない、ディープコピーは自前で用意する必要あり</span>
+<span class=hljs-keyword >const</span> person2 = person;
+person2.age = <span class=hljs-number >24</span>;
+<span class=hljs-built_in >console</span>.log(person.age);   <span class=hljs-comment >// -&gt; 24 変更はオリジナルにも及ぶ</span>
+<span class=hljs-comment >// 直下プロパティはコピー、ネストしたオブジェクトは否</span>
+<span class=hljs-keyword >const</span> person3 = <span class=hljs-built_in >Object</span>.assign({}, person);
+person3.name = <span class=hljs-string >&quot;motoko&quot;</span>;
+person3.score.eng = <span class=hljs-number >0</span>;
+person.name;   <span class=hljs-comment >// -&gt; &quot;taro&quot;</span>
+person.score.eng;   <span class=hljs-comment >// -&gt; 0  ネストオブジェクトのプロパティは変更される</span>
+
+<span class=hljs-comment >// Optional Chaining (ES2020)</span>
+score.aaa.bbb;   <span class=hljs-comment >// undefではなくエラー</span>
+score?.aaa?.bbb;   <span class=hljs-comment >// -&gt; undefined</span></code></pre> <h3 id=json ><a href="#json">JSON</a></h3> <p>関数、Symbol、RegExp、Map、SetなどはJSONに変換できない</p> <pre><code class="javascript hljs"><span class=hljs-keyword >const</span> json = <span class=hljs-string >&#x27;{ &quot;name&quot;: &quot;taro&quot;, &quot;age&quot;: 22 }&#x27;</span>;
+<span class=hljs-built_in >JSON</span>.parse(json);
+
+<span class=hljs-keyword >const</span> jsonArr = <span class=hljs-string >&#x27;[1,2,3]&#x27;</span>;
+<span class=hljs-built_in >JSON</span>.parse(jsonArr);   <span class=hljs-comment >// -&gt; 配列としてパースされる</span>
+
+<span class=hljs-keyword >const</span> obj = {<span class=hljs-attr >name</span>:<span class=hljs-string >&quot;taro&quot;</span>, <span class=hljs-attr >age</span>:<span class=hljs-number >22</span>};
+<span class=hljs-built_in >JSON</span>.stringify(obj);   <span class=hljs-comment >// -&gt; JSON string</span>
+<span class=hljs-built_in >JSON</span>.stringify(obj, replace);   <span class=hljs-comment >// 関数または配列replaceによって変換しつつ、4spacesインデントで作成</span>
+<span class=hljs-built_in >JSON</span>.stringify(obj, <span class=hljs-literal >null</span>, space);   <span class=hljs-comment >// インデントに使う空白の数あるいは&quot;\t&quot;を指定</span>
+
+<span class=hljs-keyword >const</span> tojson = {
+    <span class=hljs-attr >name</span>: <span class=hljs-string >&quot;taro&quot;</span>,
+    <span class=hljs-function ><span class=hljs-title >toJSON</span>(<span class=hljs-params ></span>)</span> {
+        <span class=hljs-keyword >return</span> <span class=hljs-string >&quot;json&quot;</span>;
+    }
+};
+<span class=hljs-built_in >JSON</span>.stringify(tojson);   <span class=hljs-comment >// -&gt; &#x27;&quot;json&quot;&#x27; オブジェクトにtoJSONメソッドがあればそれを使う</span></code></pre> <h2 id="様々なオブジェクト"><a href="#様々なオブジェクト">様々なオブジェクト</a></h2> <h3 id="文字列"><a href="#文字列">文字列</a></h3> <p>正規表現は後日</p> <pre><code class="javascript hljs"><span class=hljs-comment >// リテラル</span>
+<span class=hljs-keyword >const</span> myStr = <span class=hljs-string >&#x27;Hello, world!&#x27;</span>;   <span class=hljs-comment >// シングルクォートもダブルと同じ</span>
+<span class=hljs-keyword >const</span> newLiteral = <span class=hljs-string >`
+	hello,
+	<span class=hljs-subst >${yourName}</span>!
+`</span>;   <span class=hljs-comment >// テンプレートリテラル(ES2015)、改行や値の埋め込みができる</span>
+
+<span class=hljs-comment >// 結合</span>
+<span class=hljs-keyword >const</span> strs = <span class=hljs-string >&quot;You&#x27;re &quot;</span> + <span class=hljs-string >&quot;welcome&quot;</span>;
+<span class=hljs-keyword >const</span> myAge = <span class=hljs-number >20</span>;
+<span class=hljs-keyword >const</span> valueInString = <span class=hljs-string >&quot;I&#x27;m &quot;</span> + myAge + <span class=hljs-string >&quot; years old.&quot;</span>;   <span class=hljs-comment >// 暗黙的型変換</span>
+
+<span class=hljs-comment >// 文字コード</span>
+strs.charCodeAt(<span class=hljs-number >0</span>).toString(<span class=hljs-number >16</span>);   <span class=hljs-comment >// 10進数で文字コードを取得し、16進数に直し文字列で返す</span>
+<span class=hljs-built_in >String</span>.fromCharCode(
+    <span class=hljs-number >0x3069</span>,
+    <span class=hljs-number >0x3046</span>,
+    <span class=hljs-number >0x3082</span>
+);   <span class=hljs-comment >// -&gt; &#x27;どうも&#x27;</span>
+
+
+<span class=hljs-comment >// いつもの文字列操作</span>
+<span class=hljs-keyword >const</span> week = <span class=hljs-string >&quot;月,火,水,木,金&quot;</span>;
+week.length;
+week.split(<span class=hljs-string >&quot;,&quot;</span>);
+week.split(<span class=hljs-string >&quot;,&quot;</span>).join(<span class=hljs-string >&quot;-&quot;</span>);
+<span class=hljs-comment >// 切り出し</span>
+week.slice(<span class=hljs-number >4</span>);   <span class=hljs-comment >// -&gt; &#x27;水,木,金&#x27;</span>
+week.slice(-<span class=hljs-number >3</span>);   <span class=hljs-comment >// -&gt; &#x27;木,金&#x27;</span>
+week.slice(<span class=hljs-number >4</span>,<span class=hljs-number >8</span>);   <span class=hljs-comment >// -&gt; &#x27;水,木,&#x27;</span>
+week.substring(-<span class=hljs-number >3</span>);   <span class=hljs-comment >// -&gt; .slice(0)、負の添字は0として扱われる</span>
+week.substring(<span class=hljs-number >8</span>,<span class=hljs-number >4</span>);   <span class=hljs-comment >// -&gt; .slice(4,8)、開始位置と終了位置は順不同</span>
+<span class=hljs-comment >// 探索</span>
+week.indexOf(<span class=hljs-string >&quot;火,水&quot;</span>);   <span class=hljs-comment >// -&gt; 2</span>
+week.indexOf(<span class=hljs-string >&quot;土&quot;</span>);   <span class=hljs-comment >// -&gt; -1  存在しない</span>
+week.lastIndexOf(<span class=hljs-string >&quot;,&quot;</span>);   <span class=hljs-comment >// -&gt; 7</span>
+week.startsWith(<span class=hljs-string >&quot;火,水&quot;</span>);   <span class=hljs-comment >// -&gt; false</span>
+week.endsWith(<span class=hljs-string >&quot;水,木,金&quot;</span>);   <span class=hljs-comment >// -&gt; true</span>
+week.includes(<span class=hljs-string >&quot;水&quot;</span>);   <span class=hljs-comment >// -&gt; true</span>
+<span class=hljs-comment >// 置換</span>
+week.replace(<span class=hljs-string >&quot;木,金&quot;</span>, <span class=hljs-string >&quot;...&quot;</span>);   <span class=hljs-comment >// -&gt; &#x27;月,火,水,...&#x27;</span>
+
+<span class=hljs-comment >/*
+タグ付きテンプレート関数 (ES2015)
+	juliaの@r_strマクロのように呼び出すと特殊な挙動
+	$第一引数に{値}でsplitされた文字列の配列が、それぞれの値が可変長引数として渡される
+*/</span>
+関数名<span class=hljs-string >`index: <span class=hljs-subst >${<span class=hljs-number >1</span>}</span>, value: <span class=hljs-subst >${<span class=hljs-number >255</span>}</span>`</span>   <span class=hljs-comment >// 関数名([&quot;index: &quot;,&quot;, value: &quot;,&quot;&quot;], 1, 255)</span></code></pre> <h3 id="配列"><a href="#配列">配列</a></h3> <ul> <li><p>添字は0から</p> <li><p><code>length</code>などのプロパティ</p> <li><p><code>isArray</code>などのメソッド（<code>typeof arr</code>の結果は<code>object</code>になってしまう）</p> <li><p>TypedArray - ES2015、StaticArrays.jlのようなもの？</p> </ul> <h4 id="基本"><a href="#基本">基本</a></h4> <pre><code class="javascript hljs"><span class=hljs-comment >// アクセス</span>
+<span class=hljs-keyword >const</span> arr = [<span class=hljs-string >&quot;A&quot;</span>,<span class=hljs-string >&quot;B&quot;</span>,<span class=hljs-string >&quot;C&quot;</span>,<span class=hljs-string >&quot;D&quot;</span>,<span class=hljs-string >&quot;E&quot;</span>];
+arr.slice(<span class=hljs-number >2</span>);   <span class=hljs-comment >// -&gt; [ &#x27;C&#x27;, &#x27;D&#x27;, &#x27;E&#x27; ]</span>
+arr.slice(<span class=hljs-number >2</span>,<span class=hljs-number >4</span>);   <span class=hljs-comment >// -&gt; [ &#x27;C&#x27;, &#x27;D&#x27; ]</span>
+arr.slice(-<span class=hljs-number >2</span>);   <span class=hljs-comment >// -&gt; [ &#x27;D&#x27;, &#x27;E&#x27; ]  後ろから2番目以降</span>
+
+<span class=hljs-comment >// 結合</span>
+arr.concat([<span class=hljs-string >&quot;F&quot;</span>,<span class=hljs-string >&quot;G&quot;</span>]);   <span class=hljs-comment >// 配列以外の値も渡せる</span>
+[...arr, <span class=hljs-string >&quot;F&quot;</span>, <span class=hljs-string >&quot;G&quot;</span>];   <span class=hljs-comment >// ES2015</span>
+
+<span class=hljs-comment >// 分割代入 (ES2015)</span>
+<span class=hljs-keyword >const</span> nums = [<span class=hljs-number >1</span>,<span class=hljs-number >2</span>,<span class=hljs-number >3</span>];
+<span class=hljs-keyword >const</span> [one, two, three] = nums;</code></pre> <h4 id="追加削除破壊的"><a href="#追加削除破壊的">追加、削除（破壊的）</a></h4> <ul> <li><p>juliaの末尾&#33;のようには破壊的であるか名前で判別できない</p> <li><p>配列を便利に扱えるライブラリがある</p> </ul> <pre><code class="javascript hljs">arr.push(<span class=hljs-string >&quot;F&quot;</span>);
+arr.unshift(<span class=hljs-string >&quot;Z&quot;</span>);   <span class=hljs-comment >// 先頭に追加</span>
+arr.pop();
+arr.shift();   <span class=hljs-comment >// 先頭を削除</span>
+arr.splice(<span class=hljs-number >1</span>,<span class=hljs-number >2</span>,<span class=hljs-string >&quot;b&quot;</span>,<span class=hljs-string >&quot;c&quot;</span>);   <span class=hljs-comment >// -&gt; [ &#x27;A&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;D&#x27;, &#x27;E&#x27; ]  削除&amp;追加</span>
+arr.splice(<span class=hljs-number >1</span>,<span class=hljs-number >1</span>);   <span class=hljs-comment >// arr[1]を削除</span>
+arr.length = <span class=hljs-number >0</span>;   <span class=hljs-comment >// 指定した要素数になるよう切り詰める</span></code></pre> <h4 id="検索"><a href="#検索">検索</a></h4> <pre><code class="javascript hljs"><span class=hljs-comment >// 特定の要素を持っているか</span>
+lang.includes(<span class=hljs-string >&quot;JavaScript&quot;</span>);   <span class=hljs-comment >// ES2016</span>
+lang.some(<span class=hljs-function ><span class=hljs-params >l</span> =&gt;</span> l===<span class=hljs-string >&quot;JavaScript&quot;</span>);   <span class=hljs-comment >// コールバック関数を使う方法</span>
+
+<span class=hljs-comment >// 添字検索</span>
+<span class=hljs-comment >// objectリテラルは新たなオブジェクトを作るためindexOf({ k: &quot;v&quot; })としても厳密に等しくならないので-1</span>
+<span class=hljs-keyword >const</span> lang = [<span class=hljs-string >&quot;Julia&quot;</span>, <span class=hljs-string >&quot;JavaScript&quot;</span>, <span class=hljs-string >&quot;Go&quot;</span>, <span class=hljs-string >&quot;Rust&quot;</span>];
+lang.indexOf(<span class=hljs-string >&quot;Rust&quot;</span>);   <span class=hljs-comment >// -&gt; 3  方法１</span>
+lang.indexOf(<span class=hljs-string >&quot;Python&quot;</span>);   <span class=hljs-comment >// -&gt; -1  存在しない</span>
+lang.findIndex(<span class=hljs-function ><span class=hljs-params >x</span> =&gt;</span> x===<span class=hljs-string >&quot;Rust&quot;</span>);   <span class=hljs-comment >// 方法２</span>
+
+<span class=hljs-comment >// 要素検索</span>
+lang.find(<span class=hljs-function ><span class=hljs-params >l</span> =&gt;</span> {
+    <span class=hljs-keyword >return</span> l.startsWith(<span class=hljs-string >&quot;J&quot;</span>);
+});   <span class=hljs-comment >// -&gt; &#x27;Julia&#x27;  ES2015</span></code></pre> <h4 id="反復処理"><a href="#反復処理">反復処理</a></h4> <pre><code class="javascript hljs"><span class=hljs-keyword >const</span> myArray = [<span class=hljs-number >1</span>,<span class=hljs-number >2</span>,<span class=hljs-number >3</span>];
+
+<span class=hljs-comment >// foreach</span>
+myArray.forEach(<span class=hljs-function >(<span class=hljs-params >v, i, self</span>) =&gt;</span> {
+    <span class=hljs-built_in >console</span>.log(<span class=hljs-string >`value: <span class=hljs-subst >${v}</span>, index: <span class=hljs-subst >${i}</span>`</span>);
+});
+
+<span class=hljs-comment >// map</span>
+myArray.map(<span class=hljs-function >(<span class=hljs-params >v, i, self</span>) =&gt;</span> {
+    <span class=hljs-keyword >return</span> v**<span class=hljs-number >3</span>;
+});   <span class=hljs-comment >// -&gt; [1,8,27]</span>
+
+<span class=hljs-comment >// フィルター</span>
+myArray.filter(<span class=hljs-function >(<span class=hljs-params >v, i, self</span>) =&gt;</span> {
+    <span class=hljs-keyword >return</span> v &lt; <span class=hljs-number >3</span>;
+});   <span class=hljs-comment >// -&gt; [1,2]</span></code></pre> <h3 id="マップ_es2015"><a href="#マップ_es2015">マップ &#40;ES2015&#41;</a></h3> <ul> <li><p>キーにあらゆるオブジェクトを使える（<code>Object</code>は文字列とシンボルのみ）</p> <li><p>プロパティ継承による意図しない結果を得る危険を回避可</p> <li><p>JSONへの変換、およびライブラリ等の関数の対応は<code>Object</code>に軍配が上がる</p> </ul> <pre><code class="javascript hljs"><span class=hljs-keyword >const</span> score = <span class=hljs-keyword >new</span> <span class=hljs-built_in >Map</span>(
+    [
+        [<span class=hljs-string >&quot;mathematics&quot;</span>, <span class=hljs-string >&quot;84&quot;</span>],
+        [<span class=hljs-string >&quot;japanese&quot;</span>, <span class=hljs-string >&quot;68&quot;</span>]
+    ]
+);
+
+<span class=hljs-comment >// アクセス、操作</span>
+score.get(<span class=hljs-string >&quot;japanese&quot;</span>);
+score.set(<span class=hljs-string >&quot;english&quot;</span>, <span class=hljs-string >&quot;73&quot;</span>);
+score.size;
+score.has(<span class=hljs-string >&quot;physics&quot;</span>);   <span class=hljs-comment >// -&gt; false</span>
+score.delete(<span class=hljs-string >&quot;mathematics&quot;</span>);
+score.clear();
+
+<span class=hljs-comment >// イテレーション</span>
+<span class=hljs-keyword >const</span> map = <span class=hljs-keyword >new</span> <span class=hljs-built_in >Map</span>([[<span class=hljs-string >&quot;A&quot;</span>,<span class=hljs-string >&quot;a&quot;</span>],[<span class=hljs-string >&quot;B&quot;</span>,<span class=hljs-string >&quot;b&quot;</span>],[<span class=hljs-string >&quot;C&quot;</span>,<span class=hljs-string >&quot;c&quot;</span>]]);
+<span class=hljs-built_in >Array</span>.from(map.keys());   <span class=hljs-comment >// keyのイテレータから配列を作る</span>
+map.entries();   <span class=hljs-comment >// [key,value]形式のイテレータ、マップ自身もイテレータなのでfor-ofで回せる</span></code></pre> <h3 id=set ><a href="#set">Set</a></h3> <pre><code class="javascript hljs"><span class=hljs-keyword >const</span> subject = <span class=hljs-keyword >new</span> <span class=hljs-built_in >Set</span>([
+        <span class=hljs-string >&quot;mathematics&quot;</span>,
+        <span class=hljs-string >&quot;japanese&quot;</span>,
+        <span class=hljs-string >&quot;english&quot;</span>,
+        <span class=hljs-string >&quot;japanese&quot;</span>
+]);
+
+subject.size;   <span class=hljs-comment >// -&gt; 3</span>
+subject.add(<span class=hljs-string >&quot;new subject&quot;</span>);
+subject.has(<span class=hljs-string >&quot;english&quot;</span>);</code></pre> <h3 id="ほか"><a href="#ほか">ほか</a></h3> <p>以上のオブジェクトのほかにも日付を表す<code>Date</code>や数学用の関数などが定義された<code>Math</code>などがある。</p> <h2 id="スコープ"><a href="#スコープ">スコープ</a></h2> <ul> <li><p>julia同様、レキシカルスコープ（関数は呼出元ではなく定義したスコープを参照）</p> </ul> <h3 id="クロージャ"><a href="#クロージャ">クロージャ</a></h3> <pre><code class="javascript hljs"><span class=hljs-keyword >const</span> makeClosure = <span class=hljs-function >() =&gt;</span> {
+    <span class=hljs-keyword >let</span> count = <span class=hljs-number >0</span>;
+    <span class=hljs-function ><span class=hljs-keyword >function</span> <span class=hljs-title >closure</span>(<span class=hljs-params ></span>) </span>{
+        count += <span class=hljs-number >2</span>;
+        <span class=hljs-keyword >return</span> count;
+    }
+    <span class=hljs-keyword >return</span> closure;
+};
+
+<span class=hljs-keyword >const</span> myFunc = makeClosure();
+
+myFunc();   <span class=hljs-comment >// -&gt; 2</span>
+myFunc();   <span class=hljs-comment >// -&gt; 4</span></code></pre> <h3 id="thisキーワード"><a href="#thisキーワード"><code>this</code>キーワード</a></h3> <p>あるオブジェクトに対してメソッドとして呼び出した場合<code>this</code>は対象のオブジェクトを指す。</p> <ul> <li><p>実行コンテキスト</p> <ul> <li><p>スクリプトモード - 最上位スコープで<code>window</code>オブジェクト</p> <li><p>モジュールモード - 〃で<code>undefined</code></p> <li><p>グローバルオブジェクト用の<code>globalThis</code>もある</p> </ul> <li><p>関数およびメソッド</p> <ul> <li><p>呼び出し元に依存。関数として実行した場合対象オブジェクトがないため<code>undefined</code>。</p> </ul> <li><p>アロー関数</p> <ul> <li><p><code>this</code>が何を指すか定義時に静的に決まる。</p> </ul> </ul> <h3 id="モダンコードでは気にしなくてよい事"><a href="#モダンコードでは気にしなくてよい事">モダンコードでは気にしなくてよい事</a></h3> <h4 id="即時関数"><a href="#即時関数">即時関数</a></h4> <p>グローバルスコープの名前空間の汚染を避けることができるが、ES2015以降はブロックスコープで<code>let</code>や<code>const</code>を使えば解決する。</p> <pre><code class="javascript hljs">(<span class=hljs-function ><span class=hljs-keyword >function</span>(<span class=hljs-params ></span>) </span>{
+    コード...;
+})();</code></pre> <h4 id="巻き上げ"><a href="#巻き上げ">巻き上げ</a></h4> <p><code>var</code>は宣言あるいは初期化の前に参照しても例外が発生しない。<code>var</code>では最も近い関数あるいはグローバルスコープの先頭で宣言されたことになる。値の代入は巻き上げられない。</p> <p><code>function</code>キーワードを使った関数の定義も<strong>宣言</strong>であるため<code>var</code>と同じく巻き上げられる。</p> <h2 id="クラス"><a href="#クラス">クラス</a></h2> <h3 id="プロトタイプオブジェクト"><a href="#プロトタイプオブジェクト">プロトタイプオブジェクト</a></h3> <p>関数は新しいオブジェクトをつくる。（その一種としてクラスを含む）関数オブジェクトは<code>prototype</code>プロパティを持つ。これは新しいオブジェクトに継承され、自身のプロパティを新しいオブジェクトからも参照できるようになる。プロトタイプチェーンという仕組みのもと自身と自身の元になったクラスのプロパティを探索できる。</p> <h3 id="クラスの定義"><a href="#クラスの定義">クラスの定義</a></h3> <p>オブジェクトを実際に作成（インスタンス化）する際、インスタンスはそのクラスのメソッドを継承する。</p> <pre><code class="javascript hljs"><span class=hljs-class ><span class=hljs-keyword >class</span> クラス名 </span>{
+    <span class=hljs-comment >// 省略しても空のコンストラクタが自動設定、値は返さない</span>
+    <span class=hljs-function ><span class=hljs-title >constructor</span>(<span class=hljs-params >引数...</span>)</span> {
+        コード...;
+    }
+    <span class=hljs-comment >// インスタンスが継承する</span>
+    プロトタイプメソッド() {
+        コード...;
+    }
+}
+
+<span class=hljs-keyword >const</span> Score = <span class=hljs-class ><span class=hljs-keyword >class</span> </span>{
+    <span class=hljs-function ><span class=hljs-title >constructor</span>(<span class=hljs-params >eng, math, jap</span>)</span> {
+        <span class=hljs-built_in >this</span>.eng = eng;
+        <span class=hljs-built_in >this</span>.math = math;
+        <span class=hljs-built_in >this</span>.jap = jap;
+        <span class=hljs-built_in >this</span>.incrementMath = <span class=hljs-function >() =&gt;</span> {
+            <span class=hljs-built_in >this</span>.math++;
+        };
+    }
+    <span class=hljs-function ><span class=hljs-title >incrementEng</span>(<span class=hljs-params ></span>)</span> {
+        <span class=hljs-built_in >this</span>.eng++;
+    }
+};</code></pre> <h3 id="インスタンスメソッドとプロトタイプチェーン"><a href="#インスタンスメソッドとプロトタイプチェーン">インスタンスメソッドとプロトタイプチェーン</a></h3> <p>オブジェクトはまず自身のプロパティを参照し、なければプロトタイプオブジェクトのプロパティを見に行く（メソッド名衝突時インスタンスメソッドが優先）。</p> <pre><code class="javascript hljs"><span class=hljs-keyword >const</span> myScore = <span class=hljs-keyword >new</span> Score(<span class=hljs-number >77</span>, <span class=hljs-number >78</span>, <span class=hljs-number >79</span>);
+myScore.eng;   <span class=hljs-comment >// -&gt; 77</span>
+
+Score.prototype.constructor === Score;   <span class=hljs-comment >// コンストラクタ===プロトタイプオブジェクト</span>
+
+<span class=hljs-keyword >const</span> yourScore = <span class=hljs-keyword >new</span> Score(<span class=hljs-number >77</span>, <span class=hljs-number >78</span>, <span class=hljs-number >79</span>);
+myScore.incrementEng === yourScore.incrementEng;    <span class=hljs-comment >// -&gt; true プロトタイプメソッド</span>
+myScore.incrementMath === yourScore.incrementMath;  <span class=hljs-comment >// -&gt; false インスタンスごとのメソッド</span></code></pre> <h3 id="アクセッサープロパティ"><a href="#アクセッサープロパティ">アクセッサープロパティ</a></h3> <p>プロパティの参照・代入時に呼ばれる特殊なメソッドを定義。外から直接操作されたくないプロパティは<code>._name</code>のように命名する習慣がある。</p> <pre><code class="javascript hljs"><span class=hljs-keyword >const</span> Score = <span class=hljs-class ><span class=hljs-keyword >class</span> </span>{
+    <span class=hljs-function ><span class=hljs-title >constructor</span>(<span class=hljs-params >eng, math</span>)</span> {
+        <span class=hljs-built_in >this</span>._eng = eng;
+        <span class=hljs-built_in >this</span>._math = math;
+        <span class=hljs-built_in >this</span>._total = eng+math;
+    }
+    <span class=hljs-keyword >get</span> <span class=hljs-title >eng</span>() {
+        <span class=hljs-keyword >return</span> <span class=hljs-built_in >this</span>._eng;
+    }
+    <span class=hljs-keyword >set</span> <span class=hljs-title >eng</span>(<span class=hljs-params >num</span>) {
+        <span class=hljs-built_in >this</span>._eng = num;
+        <span class=hljs-built_in >this</span>._total = <span class=hljs-built_in >this</span>._math + num;
+    }
+    <span class=hljs-keyword >get</span> <span class=hljs-title >total</span>() {
+        <span class=hljs-keyword >return</span> <span class=hljs-built_in >this</span>._total;
+    }
+    <span class=hljs-keyword >set</span> <span class=hljs-title >total</span>(<span class=hljs-params >arg</span>) {
+        <span class=hljs-built_in >console</span>.log(<span class=hljs-string >&quot;You can&#x27;t assign value to total property!&quot;</span>);
+    }
+    <span class=hljs-keyword >static</span> <span class=hljs-function ><span class=hljs-title >lastYearAverage</span>(<span class=hljs-params ></span>)</span> {
+        <span class=hljs-keyword >return</span> <span class=hljs-number >177</span>;
+    }
+};
+
+<span class=hljs-keyword >const</span> score = <span class=hljs-keyword >new</span> Score(<span class=hljs-number >50</span>, <span class=hljs-number >60</span>);
+score.eng;         <span class=hljs-comment >// -&gt; 50</span>
+score.total;       <span class=hljs-comment >// -&gt; 110</span>
+score.eng = <span class=hljs-number >70</span>;
+score.total;       <span class=hljs-comment >// -&gt; 130</span>
+score.total = <span class=hljs-number >150</span>; <span class=hljs-comment >// You can&#x27;t assign value to total property!</span>
+score.total;       <span class=hljs-comment >// -&gt; 130</span></code></pre> <h3 id="静的メソッド"><a href="#静的メソッド">静的メソッド</a></h3> <p>インスタンス化なしで使えるメソッド。メソッドの前に<code>static</code>キーワードをつけるだけ。</p> <pre><code class="javascript hljs">Score.lastYearAverage();   <span class=hljs-comment >// -&gt; 177</span></code></pre>
+<h3 id="継承"><a href="#継承">継承</a></h3>
+<p>プロトタイプチェーンが働き親クラスのプロパティ・メソッドを引き継ぐ。組み込みクラスも継承できる。</p>
+<pre><code class="javascript hljs"><span class=hljs-class ><span class=hljs-keyword >class</span> <span class=hljs-title >ParentClass</span> </span>{
+    <span class=hljs-function ><span class=hljs-title >constructor</span>(<span class=hljs-params >...args</span>)</span> {
+        <span class=hljs-built_in >this</span>.a = <span class=hljs-string >&quot;parent&#x27;s property&quot;</span>;
+        <span class=hljs-built_in >this</span>.b = <span class=hljs-string >&quot;common property&quot;</span>;
+    }
+    <span class=hljs-keyword >static</span> <span class=hljs-function ><span class=hljs-title >parentMethod</span>(<span class=hljs-params ></span>)</span> {
+        <span class=hljs-built_in >console</span>.log(<span class=hljs-string >&quot;This method is defined in parent&quot;</span>);
+    }
+}
+
+<span class=hljs-comment >// 子クラスでコンストラクタの定義を省略しても、次のようなコンストラクタが自動で設定</span>
+<span class=hljs-class ><span class=hljs-keyword >class</span> <span class=hljs-title >ChildClass</span> <span class=hljs-keyword >extends</span> <span class=hljs-title >ParentClass</span> </span>{
+    <span class=hljs-function ><span class=hljs-title >constructor</span>(<span class=hljs-params >...args</span>)</span> {
+        <span class=hljs-built_in >super</span>(...args);   <span class=hljs-comment >// 同じ引数で親コンストラクタが呼び出される</span>
+        <span class=hljs-built_in >this</span>.b = <span class=hljs-string >`over written <span class=hljs-subst >${<span class=hljs-built_in >this</span>.b}</span>`</span>;   <span class=hljs-comment >// 親コンストラクタ以降はプロパティ継承済み</span>
+        <span class=hljs-built_in >this</span>.c = <span class=hljs-string >&quot;child&#x27;s property&quot;</span>
+    }
+}
+
+<span class=hljs-comment >// 子クラスで作成したインスタンスは親クラスのインスタンスでもある。</span>
+<span class=hljs-keyword >const</span> childInstance = <span class=hljs-keyword >new</span> ChildClass();
+childInstance <span class=hljs-keyword >instanceof</span> ParentClass;   <span class=hljs-comment >// -&gt; true</span>
+ChildClass.parentMethod();   <span class=hljs-comment >// -&gt; static methodも継承</span></code></pre>
+<h2 id="例外処理"><a href="#例外処理">例外処理</a></h2>
+<p>次の通りカッコの有無を除けばjuliaとほぼ同じ構文。組み込みの例外もあり、それらを投げるようにする。</p>
+<pre><code class="javascript hljs"><span class=hljs-keyword >try</span> {
+    <span class=hljs-keyword >throw</span> <span class=hljs-keyword >new</span> <span class=hljs-built_in >Error</span>(<span class=hljs-string >&quot;エラー発生&quot;</span>);
+    コード...;
+} <span class=hljs-keyword >catch</span> (error) {
+    <span class=hljs-comment >// exception handling</span>
+}</code></pre>
+<h2 id="非同期処理ecmascriptモジュール"><a href="#非同期処理ecmascriptモジュール">非同期処理&amp;ECMAScriptモジュール</a></h2>
+<p>いったんスキップ</p>
+<h2 id="出典"><a href="#出典">出典</a></h2>
+<ul>
+<li><p><a href="https://jsprimer.net">JavaScript Primer</a> - 第一部: 基本文法</p>
+
+</ul>
+<div class=page-foot >
+  <div class=copyright >
+    <div>作成:2021-01-22. 更新:2021-01-24.</div>
+    <div>
+      &copy; okshouiti. built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.
+    </div>
+  </div>
+</div>
+</div>
+  </main> 
+  <script src="/libs/vela/metisMenu.min.js"></script>
+  <script src="/libs/vela/slideout.min.js"></script>
+  
+  
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
