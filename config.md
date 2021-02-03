@@ -7,7 +7,7 @@
 @def automath = true
 @def mintoclevel = 2
 @def maxtoclevel = 4
-@def ignore = ["node_modules/", "franklin", "franklin.pub"]
+@def ignore = ["working/", "node_modules/", "franklin", "franklin.pub"]
 
 
 
