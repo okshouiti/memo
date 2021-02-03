@@ -10,3 +10,5 @@
 - プログラミング言語
   - JavaScript
     - [JuliaからJavaScriptへ入門](/lang/javascript/julia2js/)
+  - Java
+    - [JuliaからJavaへ入門](/lang/java/julia2java/)
