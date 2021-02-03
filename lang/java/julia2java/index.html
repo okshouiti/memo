@@ -1,0 +1,409 @@
+<!doctype html> <html lang=ja > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="https://cdn.jsdelivr.net/npm/highlight.js@10.5.0/styles/color-brewer.css"> <link href="/css/franklin.css" rel=stylesheet > <link href="/css/vela.css" rel=stylesheet > <link href="/css/custom.css" rel=stylesheet > <script src="/libs/vela/jquery.min.js"></script> <link rel=icon  href="/assets/favicon.png"> <title>Julia から Java へ入門</title> <div class=main-nav  id=menu > <div class=flex-container > <span class=sidebar-brand > <h3 style='font-size: 25px'>memo</h3> </span> </div> <nav class=sidebar-nav > <ul class=metismenu  id=metismenu  > <li><a href="/index.html">Home</a> <li><a href="" class=has-arrow >windows</a> <ul> <li><a href="/windows/bug.n/">bug.n</a> </ul> <li><a href="" class=has-arrow >languages</a> <ul> <li><a href="" class=has-arrow >JavaScript</a> <ul class=children > <li><a href="/lang/javascript/julia2js/">JuliaからJavaScriptへ入門</a> </ul> <li><a href="" class=has-arrow >Java</a> <ul class=children > <li><a href="/lang/java/julia2java/">JuliaからJavaへ入門</a> </ul> </ul> </ul> </nav> </div> <main id=panel > <div class="toggle-button hamburger hamburger--spin"> <div class=hamburger-box > <div class=hamburger-inner ></div> </div> </div> <h1 class="page title">Julia から Java へ入門</h1> <hr> <div class=franklin-content ><p>Julia をベースにして Java に入門する。Julia と異なる場面のみ記載。（<a href="/lang/javascript/julia2js/">Julia から JavaScript へ入門</a>の知識も前提にしてしまっているが・・・）</p> <div class=franklin-toc ><ol><li><a href="#概要">概要</a><li><a href="#インストール">インストール</a><li><a href="#ファイル作成コンパイル実行">ファイル作成、コンパイル、実行</a><li><a href="#全般">全般</a><ol><li><a href="#コメント">コメント</a><li><a href="#javadoc_とアノテーション">Javadoc とアノテーション</a></ol><li><a href="#クラス">クラス</a><ol><li><a href="#クラスの概要">クラスの概要</a><li><a href="#メンバのアクセス範囲">メンバのアクセス範囲</a><li><a href="#メンバの修飾子">メンバの修飾子</a><li><a href="#インスタンス">インスタンス</a><li><a href="#継承">継承</a><li><a href="#ポリモーフィズムなど">ポリモーフィズムなど</a><li><a href="#main_メソッド">main メソッド</a></ol><li><a href="#パッケージ">パッケージ</a><li><a href="#変数型リテラル">変数、型、リテラル</a><ol><li><a href="#プリミティブ型">プリミティブ型</a><li><a href="#ラッパークラス">ラッパークラス</a><ol><li><a href="#メンバ例">メンバ例</a><li><a href="#初期値">初期値</a></ol><li><a href="#参照型">参照型</a></ol><li><a href="#演算子">演算子</a><li><a href="#ループ">ループ</a><li><a href="#条件評価">条件評価</a><ol><li><a href="#if_文">if 文</a><li><a href="#switch_文">switch 文</a><li><a href="#breakcontinue"><code>break</code>、<code>continue</code></a></ol><li><a href="#様々なデータ">様々なデータ</a><ol><li><a href="#文字列">文字列</a><li><a href="#数値">数値</a><li><a href="#配列">配列</a></ol><li><a href="#雑多な_tips">雑多な Tips</a><li><a href="#出典">出典</a></ol></div> <h2 id="概要"><a href="#概要">概要</a></h2> <p>Java プログラムは Java 仮想マシン上で動くため、OS の違いを Java が吸収しあらゆる環境で動くプログラムを作成できる。</p> <ul> <li><p>エディション</p> <ol> <li><p>Java SE &#40;Standaard Edition&#41;</p> <ul> <li><p>VM や標準 API などを含む標準エディション</p> </ul> <li><p>Java EE &#40;Enterprise Edition&#41;</p> <ul> <li><p>サーバアプリ開発用の機能が多く含まれる</p> </ul> <li><p>Java ME &#40;Micro Edition&#41;</p> <ul> <li><p>組み込みデバイスなどリソースが限定される環境向け</p> </ul> </ol> <li><p>２つの環境</p> <ol> <li><p>JRE &#40;Java Runtime Environment&#41;</p> <ul> <li><p>ランタイム。コンパイル済みの JAR ファイルやクラスファイルを実行する環境。</p> </ul> <li><p>JDK &#40;Java Development Kit&#41;</p> <ul> <li><p>開発環境。実行環境&#43;コンパイラ&#43;デバッガ&#43;etc...。</p> </ul> </ol> <li><p>様々な VM</p> <ul> <li><p>Oracle 製で最大シェアの HotSpot やオープンソースの OpenJDK など数多ある</p> </ul> <li><p>実行フロー</p> <ol> <li><p><code>.java</code>ファイル（ソースコード）を作成</p> <li><p>ソースコードを<code>.class</code>中間コード（VM 上で実行可能な Java 実行ファイル）にコンパイル</p> <li><p>中間コードを各種 OS 上の VM で実行</p> </ol> </ul> <h2 id="インストール"><a href="#インストール">インストール</a></h2> <pre><code class="powershell hljs">scoop bucket add java
+scoop install oraclejdk  <span class=hljs-comment ># 2020年2月現在はversion15が入る</span></code></pre> <h2 id="ファイル作成コンパイル実行"><a href="#ファイル作成コンパイル実行">ファイル作成、コンパイル、実行</a></h2> <pre><code class="java hljs"><span class=hljs-keyword >public</span> <span class=hljs-class ><span class=hljs-keyword >class</span> <span class=hljs-title >Hello</span></span>{
+    <span class=hljs-function ><span class=hljs-keyword >public</span> <span class=hljs-keyword >static</span> <span class=hljs-keyword >void</span> <span class=hljs-title >main</span><span class=hljs-params >(String... args)</span></span>{
+        System.out.println(<span class=hljs-string >&quot;Hello, world!&quot;</span>);
+    }
+}</code></pre> <p>という<code>hello world</code>プログラムがあったとして、これを<code>Hello.java</code>というファイル名で保存（ファイル名＝クラス名、UTF-8 BOM 無し）。そして、これをコンパイルするには</p> <pre><code class="powershell hljs">javac <span class=hljs-literal >-encoding</span> UTF<span class=hljs-literal >-8</span> Hello.java</code></pre>
+<p>とすればよい。これを実行するには拡張子をつけずに</p>
+<pre><code class="powershell hljs">java Hello</code></pre>
+<p>でＯＫ。</p>
+<h2 id="全般"><a href="#全般">全般</a></h2>
+<h3 id="コメント"><a href="#コメント">コメント</a></h3>
+<pre><code class="java hljs"><span class=hljs-comment >// 単行コメント</span>
+
+<span class=hljs-comment >/*
+複数行コメント
+*/</span></code></pre>
+<h3 id="javadoc_とアノテーション"><a href="#javadoc_とアノテーション">Javadoc とアノテーション</a></h3>
+<p>Julia の docstring 同様、Java にもソース中に埋め込んだ文字列からドキュメントを生成する機能がある。また<code>@override</code>でオーバーライドを、<code>@Depricated</code>で非推奨を、<code>@SuppressWarnings</code>で警告を出さないことを注釈できる。</p>
+<pre><code class="java hljs"><span class=hljs-comment >/**
+ * 点数を扱うクラス
+*/</span>
+<span class=hljs-class ><span class=hljs-keyword >class</span> <span class=hljs-title >Score</span> </span>{
+    <span class=hljs-comment >/** 生徒名 */</span>
+    String name;
+
+    <span class=hljs-comment >/** 英語の点数 */</span>
+    <span class=hljs-keyword >int</span> eng;
+
+    <span class=hljs-comment >/**
+     * コンストラクタ
+     * <span class=hljs-doctag >@param</span> name 生徒名
+     * <span class=hljs-doctag >@param</span> eng 英語の点数
+    */</span>
+    Score(String name, <span class=hljs-keyword >int</span> eng) {
+        <span class=hljs-keyword >this</span>.name = name;
+        <span class=hljs-keyword >this</span>.eng = eng;
+    }
+    <span class=hljs-meta >@Override</span>
+    <span class=hljs-function ><span class=hljs-keyword >public</span> String <span class=hljs-title >toString</span><span class=hljs-params >()</span> </span>{
+        <span class=hljs-keyword >return</span> name;
+    }
+}</code></pre>
+<h2 id="クラス"><a href="#クラス">クラス</a></h2>
+<h3 id="クラスの概要"><a href="#クラスの概要">クラスの概要</a></h3>
+<ul>
+<li><p>クラス名はアッパーキャメルケース</p>
+
+<li><p>メンバ - 「クラスに属するもの &#61; フィールド&amp;メソッド」</p>
+<ul>
+<li><p>クラスメンバ　「インスタンス化しなくても参照できる、<code>static</code>修飾子をつける」</p>
+
+</ul>
+
+</ul>
+<pre><code class="java hljs">修飾子 <span class=hljs-class ><span class=hljs-keyword >class</span> クラス名</span>{
+    フィールド...;   <span class=hljs-comment >// クラス内のすべてのメソッドからアクセス可能</span>
+    クラス名(引数...) {
+        <span class=hljs-comment >// クラス名メソッド=コンストラクタ</span>
+    }
+    メソッド...;
+}
+
+
+<span class=hljs-class ><span class=hljs-keyword >class</span> <span class=hljs-title >Score</span> </span>{
+    String name;
+    <span class=hljs-keyword >int</span> eng, math;
+    <span class=hljs-keyword >private</span> <span class=hljs-keyword >int</span> jap = <span class=hljs-number >80</span>;   <span class=hljs-comment >// 外から見えない</span>
+    <span class=hljs-keyword >static</span> <span class=hljs-keyword >int</span> lastYearAverage = <span class=hljs-number >76</span>;   <span class=hljs-comment >// クラスメンバ</span>
+    <span class=hljs-comment >// 初期化ブロック、フィールドの規定値を設定。staticでクラスメンバにすることもできる</span>
+    {
+        name = <span class=hljs-string >&quot;taro&quot;</span>;
+        eng = <span class=hljs-number >80</span>;
+        math = <span class=hljs-number >77</span>;
+    }
+    Score(String name, <span class=hljs-keyword >int</span> eng) {
+        <span class=hljs-keyword >this</span>.name = name;
+        <span class=hljs-keyword >this</span>.eng = eng;
+    }
+    <span class=hljs-comment >// アクセッサメソッド</span>
+    <span class=hljs-function ><span class=hljs-keyword >int</span> <span class=hljs-title >getJapaneseScore</span><span class=hljs-params >()</span> </span>{
+        <span class=hljs-keyword >return</span> jap;
+    }
+    <span class=hljs-function ><span class=hljs-keyword >void</span> <span class=hljs-title >setJapaneseScore</span><span class=hljs-params >(<span class=hljs-keyword >int</span> score)</span> </span>{
+        <span class=hljs-keyword >if</span> ((<span class=hljs-number >0</span> &lt; score) &amp;&amp; (score &lt; <span class=hljs-number >100</span>)) {
+            <span class=hljs-keyword >this</span>.jap = score;
+        } <span class=hljs-keyword >else</span> {
+            System.out.println(<span class=hljs-string >&quot;Score must be [0 &lt; score &lt; 100]&quot;</span>);
+        }
+    }
+    <span class=hljs-function ><span class=hljs-keyword >void</span> <span class=hljs-title >printEnglishScore</span><span class=hljs-params >(<span class=hljs-keyword >int</span> eng)</span> </span>{
+        System.out.println(eng);   <span class=hljs-comment >// フィールドと同名の引数が優先される</span>
+        System.out.println(<span class=hljs-keyword >this</span>.eng);
+    }
+}</code></pre>
+<h3 id="メンバのアクセス範囲"><a href="#メンバのアクセス範囲">メンバのアクセス範囲</a></h3>
+<table><tr><th align=right >修飾子<th align=right >どこからアクセスできるか<tr><td align=right >なし<td align=right >同クラス内、同パッケージ内<tr><td align=right ><code>public</code><td align=right >アクセス範囲無制限<tr><td align=right ><code>private</code><td align=right >同クラス内メンバのみ<tr><td align=right ><code>protected</code><td align=right >同クラス内およびサブクラス内、同パッケージ内</table>
+<h3 id="メンバの修飾子"><a href="#メンバの修飾子">メンバの修飾子</a></h3>
+<table><tr><th align=right >aaa<th align=right >nnn<tr><td align=right ><code>static</code><td align=right >インスタンス化なしでアクセス可能に<tr><td align=right ><code>final</code><td align=right >メンバを定数のように上書き不可に<tr><td align=right ><code>abstract</code><td align=right >インスタンス化不可の抽象クラスを定義<tr><td align=right >etc...<td align=right ></table>
+<h3 id="インスタンス"><a href="#インスタンス">インスタンス</a></h3>
+<pre><code class="java hljs"><span class=hljs-comment >// インスタンス化</span>
+クラス名 変数 = <span class=hljs-keyword >new</span> クラス名(引数...);
+
+Score score = <span class=hljs-keyword >new</span> Score(<span class=hljs-string >&quot;kaori&quot;</span>, <span class=hljs-number >90</span>);
+score.eng;   <span class=hljs-comment >// -&gt; 90</span>
+score.getJapaneseScore();   <span class=hljs-comment >// -&gt; 80</span>
+score.setJapaneseScore(<span class=hljs-number >110</span>);  <span class=hljs-comment >// -&gt; Score must be [0 &lt; score &lt; 100]</span></code></pre>
+<h3 id="継承"><a href="#継承">継承</a></h3>
+<pre><code class="java hljs">修飾子 <span class=hljs-class ><span class=hljs-keyword >class</span> クラス名 <span class=hljs-keyword >extends</span> 親クラス名 </span>{
+    <span class=hljs-comment >// 子クラスのメンバを定義</span>
+}
+
+<span class=hljs-keyword >public</span> <span class=hljs-class ><span class=hljs-keyword >class</span> <span class=hljs-title >BunkeiScore</span> <span class=hljs-keyword >extends</span> <span class=hljs-title >Score</span> </span>{
+    <span class=hljs-keyword >int</span> poliEcon = <span class=hljs-number >77</span>;
+}</code></pre>
+<h3 id="ポリモーフィズムなど"><a href="#ポリモーフィズムなど">ポリモーフィズムなど</a></h3>
+<ul>
+<li><p>オーバーライド</p>
+<ul>
+<li><p>上位クラス内で定義されているメソッドをサブクラス内で再定義すること</p>
+
+<li><p><code>@Override</code>でオーバーライドを明示する</p>
+
+</ul>
+
+<li><p>オーバーロード</p>
+<ul>
+<li><p>引数の型や数が異なる複数のメソッドを定義すること</p>
+
+<li><p>コンストラクタでも同様</p>
+
+</ul>
+
+<li><p>メソッドの動的束縛</p>
+<ul>
+<li><p>呼び出されるメソッドはインスタンス変数の型によらずインスタンスの種類によって決定される</p>
+
+</ul>
+
+</ul>
+<pre><code class="java hljs"><span class=hljs-class ><span class=hljs-keyword >class</span> <span class=hljs-title >A</span> </span>{
+    <span class=hljs-function ><span class=hljs-keyword >void</span> <span class=hljs-title >greet</span><span class=hljs-params >()</span> </span>{
+        System.out.println(<span class=hljs-string >&quot;Hi! I&#x27;m A!&quot;</span>);
+    }
+}
+<span class=hljs-class ><span class=hljs-keyword >class</span> <span class=hljs-title >B</span> <span class=hljs-keyword >extends</span> <span class=hljs-title >A</span> </span>{
+    <span class=hljs-function ><span class=hljs-keyword >void</span> <span class=hljs-title >greet</span><span class=hljs-params >()</span> </span>{
+        System.out.println(<span class=hljs-string >&quot;Hi! I&#x27;m B!&quot;</span>);
+    }
+}
+A aaa = <span class=hljs-keyword >new</span> A();
+A bbb = <span class=hljs-keyword >new</span> B();   <span class=hljs-comment >// A型でBのインスタンスを作成</span>
+aaa.greet();   <span class=hljs-comment >// -&gt; Hi! I&#x27;m A!</span>
+bbb.greet();   <span class=hljs-comment >// -&gt; Hi! I&#x27;m B!</span></code></pre>
+<h3 id="main_メソッド"><a href="#main_メソッド">main メソッド</a></h3>
+<pre><code class="java hljs"><span class=hljs-function ><span class=hljs-keyword >public</span> <span class=hljs-keyword >static</span> <span class=hljs-keyword >void</span> <span class=hljs-title >main</span><span class=hljs-params >(String... args)</span> </span>{
+    <span class=hljs-comment >// プログラム開始時に実行される処理</span>
+}</code></pre>
+<h2 id="パッケージ"><a href="#パッケージ">パッケージ</a></h2>
+<p>Julia におけるモジュールに該当。</p>
+<ul>
+<li><p>各ファイルの先頭に記述</p>
+
+<li><p>パッケージに所属させることでクラス名の衝突を回避できる</p>
+
+<li><p>外からは<code>PkgName.ClassName</code>でアクセスできる</p>
+
+<li><p>サブパッケージのように階層構造を形成できる</p>
+
+<li><p>（？おそらく命名規則は lowercase で区切り文字は<code>.</code>）</p>
+
+</ul>
+<pre><code class="java hljs"><span class=hljs-keyword >package</span> packagename;
+
+<span class=hljs-comment >// 別パッケージのクラスをパッケージ名を省略して呼べるようにする</span>
+<span class=hljs-keyword >import</span> otherpackage.OtherClass;
+<span class=hljs-keyword >import</span> otherpackage.*;   <span class=hljs-comment >// ワイルドカードで全部読み込む</span>
+<span class=hljs-keyword >import</span> <span class=hljs-keyword >static</span> otherpackage.Otherclass.*;   <span class=hljs-comment >// staticインポートでクラスメンバをクラス名なしで参照できるように</span>
+
+<span class=hljs-keyword >public</span> <span class=hljs-class ><span class=hljs-keyword >class</span> <span class=hljs-title >MyClass</span> </span>{
+    <span class=hljs-comment >// メンバなど</span>
+}</code></pre>
+<h2 id="変数型リテラル"><a href="#変数型リテラル">変数、型、リテラル</a></h2>
+<p>暗黙的に型変換されるが、意図的な型変換（キャスト）もできる。変数名は case-sensitive、命名は lower キャメルケース。</p>
+<pre><code class="java hljs"><span class=hljs-comment >// 型推論を効かせる</span>
+<span class=hljs-keyword >var</span> 変数名 = 値;
+
+<span class=hljs-comment >// 定数</span>
+<span class=hljs-keyword >final</span> 型 変数名 = 値;
+<span class=hljs-keyword >final</span> <span class=hljs-keyword >int</span> MY_AGE = <span class=hljs-number >24</span>;
+
+<span class=hljs-comment >// 型変換</span>
+<span class=hljs-keyword >int</span> m = <span class=hljs-number >32768</span>;   <span class=hljs-comment >// shortの表現限界2^15-1より１大きい</span>
+<span class=hljs-keyword >short</span> n = (<span class=hljs-keyword >short</span>)m;   <span class=hljs-comment >// キャスト（ナローイング）</span>
+
+<span class=hljs-comment >// 文字</span>
+<span class=hljs-keyword >char</span> c1; <span class=hljs-comment >// 宣言</span>
+<span class=hljs-keyword >char</span> c2 = <span class=hljs-string >&#x27;a&#x27;</span>; <span class=hljs-comment >// 初期化</span>
+<span class=hljs-keyword >char</span> c3, c4; <span class=hljs-comment >// まとめて宣言</span>
+c3 = c4 = <span class=hljs-string >&#x27;\u0061&#x27;</span>;
+
+<span class=hljs-comment >// 文字列</span>
+<span class=hljs-comment >// &quot;&quot;&quot;みたいな自動エスケープリテラルはない？</span>
+String str = <span class=hljs-string >&quot;my string&quot;</span>;
+
+<span class=hljs-comment >// 整数</span>
+<span class=hljs-keyword >int</span> num1 = <span class=hljs-number >255</span>;
+System.out.println(<span class=hljs-number >1000000000L</span>); <span class=hljs-comment >// long型を断定、juliaでの`::Int64`か？</span>
+<span class=hljs-number >3_000_000</span>; <span class=hljs-comment >// 桁区切り</span>
+
+<span class=hljs-comment >// 浮動小数点数</span>
+<span class=hljs-keyword >double</span> num2 = <span class=hljs-number >3.14</span>;
+<span class=hljs-number >2.0e3</span>; <span class=hljs-comment >// 2.0x10^3 = 2000.0</span>
+<span class=hljs-number >2.0e-3</span>; <span class=hljs-comment >// 2.0x10^-3 = 0.002</span>
+
+<span class=hljs-comment >// ブール型</span>
+<span class=hljs-keyword >boolean</span> bool = <span class=hljs-keyword >true</span>;</code></pre>
+<h3 id="プリミティブ型"><a href="#プリミティブ型">プリミティブ型</a></h3>
+<table><tr><th align=right >型<th align=right >リテラル式例<th align=right >ラッパークラス<th align=right >対応する Julia の型<th align=right >説明<tr><td align=right ><code>byte</code><td align=right ><code>0x2c</code><td align=right ><code>java.lang.Byte</code><td align=right ><code>Int8</code><td align=right >8bit 整数<tr><td align=right ><code>short</code><td align=right ><code>12345</code><td align=right ><code>java.lang.Short</code><td align=right ><code>Int16</code><td align=right >16bit 整数<tr><td align=right ><code>int</code><td align=right ><code>12345</code><td align=right ><code>java.lang.Integer</code><td align=right ><code>Int32</code><td align=right >32bit 整数<tr><td align=right ><td align=right ><code>0101011</code><td align=right ><td align=right ><td align=right >8 進数、先頭に 0<tr><td align=right ><td align=right ><code>0x1ac</code><td align=right ><td align=right ><td align=right >16 進数<tr><td align=right ><td align=right ><code>0b10</code><td align=right ><td align=right ><td align=right >2 進数<tr><td align=right ><code>long</code><td align=right ><code>123_456_789L</code><td align=right ><code>java.lang.Long</code><td align=right ><code>Int64</code><td align=right >64bit 整数<tr><td align=right ><code>float</code><td align=right ><code>1.732f</code>、<code>2F</code><td align=right ><code>java.lang.Float</code><td align=right ><code>Float32</code><td align=right >単精度浮動小数点数<tr><td align=right ><code>double</code><td align=right ><code>1.414</code>、<code>3d</code>、<code>3D</code><td align=right ><code>java.lang.Double</code><td align=right ><code>Float64</code><td align=right >倍精度浮動小数点数<tr><td align=right ><code>char</code><td align=right ><code>&#39;c&#39;</code><td align=right ><code>java.lang.Character</code><td align=right ><code>Char</code><td align=right >文字<tr><td align=right ><code>boolean</code><td align=right ><code>true</code><td align=right ><code>java.lang.Boolean</code><td align=right ><code>Bool</code><td align=right >真偽値</table>
+<h3 id="ラッパークラス"><a href="#ラッパークラス">ラッパークラス</a></h3>
+<p>プリミティブ型はそれぞれラッパークラスと呼ばれるクラスを持ち、これらが定数やメソッドを提供する。プリミティブ型からラッパーオブジェクトへの変換は必要時に自動で行われる。</p>
+<h4 id="メンバ例"><a href="#メンバ例">メンバ例</a></h4>
+<p>ラッパークラスが提供する定数やメソッドの一例</p>
+<table><tr><th align=right >ラッパークラスのメンバ<th align=right >例<th align=right >説明<tr><td align=right ><code>SIZE</code><td align=right ><code>Byte.SIZE</code> &#40;&#61; 8&#41;<td align=right >ビット数<tr><td align=right ><code>BYTES</code><td align=right ><code>Byte.BYTES</code> &#40;&#61; 1&#41;<td align=right >バイト数<tr><td align=right ><code>MAX_VALUE</code><td align=right ><code>Byte.MAX_VALUE</code> &#40;&#61; 127&#41;<td align=right >最大値<tr><td align=right ><code>MIN_VALUE</code><td align=right ><code>Byte.MIN_VALUE</code> &#40;&#61; -128&#41;<td align=right >最小値<tr><td align=right ><code>valueOf&#40;v&#41;</code><td align=right ><code>String.valueOf&#40;1245&#41;</code><td align=right >プリミティブ値<code>v</code>からラッパークラスオブジェクトをつくる<tr><td align=right ><code>valueOf&#40;str&#41;</code><td align=right ><code>Integer.valueOf&#40;&quot;412&quot;&#41;</code><td align=right >文字列から〃<tr><td align=right ><code>valueOf&#40;str, base&#41;</code><td align=right ><code>Integer.valueOf&#40;&quot;412&quot;, 2&#41;</code><td align=right >文字列から<code>base</code>進数で〃<tr><td align=right ><code>parse&lt;PrimiClass&gt;&#40;str&#41;</code><td align=right ><code>Integer.parseInt&#40;&quot;332&quot;&#41;</code><td align=right >文字列をプリミティブ値へパース<tr><td align=right ><code>parse&lt;PrimiClass&gt;&#40;str, base&#41;</code><td align=right ><code>Integer.parseInt&#40;&quot;332&quot;, 16&#41;</code><td align=right >文字列を<code>base</code>進数で〃<tr><td align=right ><code>toString&#40;v&#41;</code><td align=right ><code>Integer.toString&#40;56&#41;</code><td align=right >プリミティブ値<code>v</code>から文字列へ<tr><td align=right ><code>toString&#40;v, base&#41;</code><td align=right ><code>Integer.toString&#40;56, 16&#41;</code><td align=right ><code>base</code>進数で〃</table>
+<h4 id="初期値"><a href="#初期値">初期値</a></h4>
+<p>フィールドを宣言する際ラッパー型とプリミティブ型では初期値が異なる。例えば、整数をプリミティブ型で宣言した場合は<code>0</code>が初期値だがラッパー型で宣言した場合は<code>null</code>となるため、値の不在を判定しなければならない場合などはラッパー型で宣言する。</p>
+<h3 id="参照型"><a href="#参照型">参照型</a></h3>
+<p>working...</p>
+<table><tr><th align=right >型<th align=right >bbb<th align=right >ccc<th align=right >ddd<tr><td align=right ><code>String</code><td align=right ><td align=right ><td align=right ></table>
+<h2 id="演算子"><a href="#演算子">演算子</a></h2>
+<pre><code class="java hljs"><span class=hljs-comment >/*
+更新・比較・論理演算子を含め、ほぼ同じ
+三項演算子 a ? b : c　までも同じ
+*/</span>
+
+<span class=hljs-comment >// 文字列連結は*ではなく+</span>
+str1 + str2
+
+<span class=hljs-comment >// インクリメント、デクリメント</span>
+++x;   <span class=hljs-comment >// インクリメント後に値を返す</span>
+y--;   <span class=hljs-comment >// 値を返してデクリメント</span>
+
+<span class=hljs-comment >// 排他的論理和</span>
+<span class=hljs-keyword >true</span> ^ <span class=hljs-keyword >false</span>;   <span class=hljs-comment >// -&gt; true</span>
+<span class=hljs-keyword >true</span> ^ <span class=hljs-keyword >true</span>;   <span class=hljs-comment >// -&gt; false</span></code></pre>
+<h2 id="ループ"><a href="#ループ">ループ</a></h2>
+<pre><code class="java hljs"><span class=hljs-comment >/*
+初期化式 = 反復変数を初期化する式
+操作式 = 各ループ処理ごとに反復変数を操作する式
+*/</span>
+
+<span class=hljs-comment >// 初期化式を省略してfor以前に初期化された変数を使って回すこともできる for ( ; 条件式; 操作式)</span>
+<span class=hljs-keyword >for</span> (初期化式; 条件式; 操作式){
+    コード...
+}
+
+<span class=hljs-comment >// 反復変数は複数同時に使える</span>
+<span class=hljs-keyword >for</span> (初期化式<span class=hljs-number >1</span>, 初期化式<span class=hljs-number >2</span>, ...; 条件式; 操作式<span class=hljs-number >1</span>, 操作式<span class=hljs-number >2</span>, ...){
+    コード...
+}
+
+<span class=hljs-comment >// for-each コレクションの要素を反復変数として使う for i ∈ collection</span>
+<span class=hljs-keyword >for</span> (型 変数名:コレクション){
+    コード...
+}
+
+
+
+<span class=hljs-comment >/*
+do-whileループ
+先に条件式を評価するwhileと異なり、まず処理を実行してから条件式を評価してループ
+*/</span>
+
+<span class=hljs-comment >// 処理が一つの場合</span>
+<span class=hljs-keyword >do</span>
+  単文;
+<span class=hljs-keyword >while</span> (条件式);
+
+<span class=hljs-keyword >do</span>{
+    コード...
+}<span class=hljs-keyword >while</span> (条件式);</code></pre>
+<h2 id="条件評価"><a href="#条件評価">条件評価</a></h2>
+<h3 id="if_文"><a href="#if_文">if 文</a></h3>
+<pre><code class="java hljs"><span class=hljs-keyword >if</span> (条件式){
+    コード...
+}<span class=hljs-keyword >else</span> <span class=hljs-keyword >if</span> (条件式){
+    コード...
+}<span class=hljs-keyword >else</span>{
+    コード...
+}
+
+<span class=hljs-comment >// 処理がひとつ</span>
+<span class=hljs-keyword >if</span> (条件式)
+    単文;
+<span class=hljs-keyword >else</span>
+    単文;</code></pre>
+<h3 id="switch_文"><a href="#switch_文">switch 文</a></h3>
+<p>これは julia に無い。式を評価し（結果は整数型でなければならない）、同じ値が<code>case</code>で指定されているとその位置から処理を実行する。複数の<code>case</code>に同じ処理をさせることも可能（例：値 2,値 3）。同じ値がない場合に<code>default</code>が定義されているならそこへ移る。<code>if</code>文のように使いたい場合は<code>case</code>の処理の最後で<code>break</code>する。</p>
+<pre><code class="java hljs"><span class=hljs-keyword >switch</span> (式){
+    <span class=hljs-keyword >case</span> 値<span class=hljs-number >1</span>:
+        コード...;
+    <span class=hljs-keyword >case</span> 値<span class=hljs-number >2</span>:
+    <span class=hljs-keyword >case</span> 値<span class=hljs-number >3</span>:
+        コード...;
+    <span class=hljs-keyword >default</span>:
+        コード...;
+}</code></pre>
+<h3 id=breakcontinue ><a href="#breakcontinue"><code>break</code>、<code>continue</code></a></h3>
+<pre><code class="java hljs"><span class=hljs-comment >/*
+ラベル付きbreak
+ラベル付きでループを定義し、break対象を指定できる
+*/</span>
+parent: <span class=hljs-keyword >for</span> (<span class=hljs-keyword >int</span> i = <span class=hljs-number >1</span>; i &lt; <span class=hljs-number >5</span>; i++){
+    <span class=hljs-keyword >for</span> (<span class=hljs-keyword >int</span> j = <span class=hljs-number >1</span>; j &lt; <span class=hljs-number >5</span>; j++){
+        <span class=hljs-keyword >break</span> parent;
+    }
+    System.out.println(i)
+}
+
+<span class=hljs-comment >// continueも同様にラベル付け可</span></code></pre>
+<h2 id="様々なデータ"><a href="#様々なデータ">様々なデータ</a></h2>
+<h3 id="文字列"><a href="#文字列">文字列</a></h3>
+<pre><code class="java hljs"><span class=hljs-comment >// リテラルで生成</span>
+String str = <span class=hljs-string >&quot;Hello, &quot;</span>;
+
+<span class=hljs-comment >// 文字の配列から作る</span>
+<span class=hljs-keyword >char</span> chars[] = {<span class=hljs-string >&#x27;a&#x27;</span>, <span class=hljs-string >&#x27;b&#x27;</span>, <span class=hljs-string >&#x27;c&#x27;</span>};
+String str = <span class=hljs-keyword >new</span> String(chars);
+
+<span class=hljs-comment >// 演算など</span>
+String str2 = <span class=hljs-string >&quot;world&quot;</span>;
+str + str2;   <span class=hljs-comment >// -&gt; &quot;Hello, world!&quot;</span>
+str.equals(str2);   <span class=hljs-comment >// -&gt; false</span>
+str.charAt(<span class=hljs-number >1</span>);   <span class=hljs-comment >// -&gt; &quot;e&quot;</span>
+str.length();   <span class=hljs-comment >// -&gt; 7</span></code></pre>
+<h3 id="数値"><a href="#数値">数値</a></h3>
+<pre><code class="java hljs"><span class=hljs-keyword >int</span> a = <span class=hljs-number >123</span></code></pre>
+<h3 id="配列"><a href="#配列">配列</a></h3>
+<pre><code class="java hljs"><span class=hljs-comment >// 宣言と生成</span>
+型 変数名[];   <span class=hljs-comment >// 方法１</span>
+型[] 変数名;   <span class=hljs-comment >// 方法２</span>
+変数名 = <span class=hljs-keyword >new</span> 型[要素数];   <span class=hljs-comment >// 宣言された配列を生成</span>
+型 変数名[] = <span class=hljs-keyword >new</span> 型[要素数];   <span class=hljs-comment >// 宣言＆生成</span>
+型[] 変数名 = <span class=hljs-keyword >new</span> 型[要素数];   <span class=hljs-comment >// 〃</span>
+型 [] 変数名 = <span class=hljs-keyword >new</span> 型[要素数];   <span class=hljs-comment >// 〃</span>
+<span class=hljs-comment >// 初期化</span>
+String strArray[] = {<span class=hljs-string >&quot;string1&quot;</span>, <span class=hljs-string >&quot;string2&quot;</span>};
+<span class=hljs-keyword >int</span> [] arr = {<span class=hljs-number >1</span>,<span class=hljs-number >2</span>,<span class=hljs-number >3</span>};
+
+<span class=hljs-comment >// 多次元配列</span>
+<span class=hljs-keyword >int</span> multi1[][] = <span class=hljs-keyword >new</span> <span class=hljs-keyword >int</span>[<span class=hljs-number >2</span>][];
+multi1[<span class=hljs-number >0</span>] = <span class=hljs-keyword >new</span> <span class=hljs-keyword >int</span>[<span class=hljs-number >2</span>];
+multi1[<span class=hljs-number >1</span>] = <span class=hljs-keyword >new</span> <span class=hljs-keyword >int</span>[<span class=hljs-number >2</span>];
+<span class=hljs-comment >// ↑ かあるいは int multi1[][] = new int[2][2];</span>
+multi1[<span class=hljs-number >0</span>][<span class=hljs-number >0</span>] = <span class=hljs-number >5</span>;
+multi1[<span class=hljs-number >0</span>][<span class=hljs-number >1</span>] = <span class=hljs-number >6</span>;
+multi1[<span class=hljs-number >1</span>][<span class=hljs-number >0</span>] = <span class=hljs-number >7</span>;
+multi1[<span class=hljs-number >1</span>][<span class=hljs-number >1</span>] = <span class=hljs-number >8</span>;
+<span class=hljs-keyword >for</span> (<span class=hljs-keyword >int</span> i=<span class=hljs-number >0</span>; i&lt;<span class=hljs-number >2</span>; i++) {
+    <span class=hljs-keyword >for</span> (<span class=hljs-keyword >int</span> j=<span class=hljs-number >0</span>; j&lt;<span class=hljs-number >2</span>; j++) {
+        System.out.println(multi1[i][j]);   <span class=hljs-comment >// -&gt; 5,6,7,8</span>
+    }
+}
+<span class=hljs-comment >// 初期化</span>
+<span class=hljs-keyword >int</span> numarr[][] = {
+    {<span class=hljs-number >3</span>, <span class=hljs-number >6</span>, <span class=hljs-number >4</span>},
+    {<span class=hljs-number >5</span>, <span class=hljs-number >7</span>, <span class=hljs-number >3</span>}
+};
+
+
+<span class=hljs-comment >// 生成された配列に値を設定する</span>
+変数名[添字] = 値;
+<span class=hljs-keyword >int</span> arr[] = {<span class=hljs-number >1</span>,<span class=hljs-number >2</span>};
+arr[<span class=hljs-number >2</span>] = <span class=hljs-number >3</span>;   <span class=hljs-comment >// 生成時の要素数を超えて代入できない（StaticArrays.jlみたいなものか）</span>
+
+<span class=hljs-comment >// コピーを作らない</span>
+<span class=hljs-keyword >int</span> a[] = {<span class=hljs-number >1</span>, <span class=hljs-number >2</span>};
+<span class=hljs-keyword >int</span> b[] = a;
+b[<span class=hljs-number >0</span>] = <span class=hljs-number >10</span>;
+System.out.println(a[<span class=hljs-number >0</span>]);   <span class=hljs-comment >// -&gt; 10</span>
+
+<span class=hljs-comment >//</span>
+arr.length;   <span class=hljs-comment >// 要素数</span></code></pre>
+<h2 id="雑多な_tips"><a href="#雑多な_tips">雑多な Tips</a></h2>
+<ul>
+<li><p>プライベートなフィールド名の後ろに<code>_</code>をつけない。高度な IDE が主流なイマドキ名前で判別する必要もない。</p>
+
+<li><p>変数は名詞、メソッドは動詞となるよう心掛けて命名する。</p>
+
+</ul>
+<h2 id="出典"><a href="#出典">出典</a></h2>
+<ul>
+<li><p><a href="https://amzn.to/3r8JMpf">Java 本格入門 ~モダンスタイルによる基礎からオブジェクト指向・実用ライブラリまで</a></p>
+
+</ul>
+<div class=page-foot >
+  <div class=copyright >
+    <div>作成:2021-02-02. 更新:2021-02-03.</div>
+    <div>
+      &copy; okshouiti. built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>.
+    </div>
+  </div>
+</div>
+</div>
+  </main> 
+  <script src="/libs/vela/metisMenu.min.js"></script>
+  <script src="/libs/vela/slideout.min.js"></script>
+  
+  
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release/build/highlight.min.js"></script>
